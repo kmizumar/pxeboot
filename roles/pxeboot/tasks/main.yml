@@ -18,13 +18,28 @@
     mode: 0644
     backup: yes
 
-- name: fix the /etc/resolv.conf
+- name: disable dns stub listener
   lineinfile:
-    dest: /etc/default/dnsmasq
+    dest: /etc/systemd/resolved.conf
     state: present
+    backrefs: yes
     backup: yes
-    insertafter: EOF
-    line: 'DNSMASQ_EXCEPT=lo'
+    regexp: '^#?(DNSStubListener\s*=).*$'
+    line: '\1no'
+
+- name: fix the /etc/resolv.conf
+  file:
+    src: /run/systemd/resolve/resolv.conf
+    dest: /etc/resolv.conf
+    state: link
+
+#- name: fix the /etc/resolv.conf
+#  lineinfile:
+#    dest: /etc/default/dnsmasq
+#    state: present
+#    backup: yes
+#    insertafter: EOF
+#    line: 'DNSMASQ_EXCEPT=lo'
 
 - name: create a directory for tftp
   file:
