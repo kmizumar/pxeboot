@@ -1,0 +1,62 @@
+- name: add apt repository
+  apt_repository:
+    repo: deb http://archive.ubuntu.com/ubuntu bionic universe
+    state: present
+
+- name: install required packages
+  apt:
+    name: [ 'dnsmasq', 'pxelinux', 'syslinux', 'syslinux-common' ]
+    state: present
+    update_cache: yes
+
+- name: upload dnsmasq.conf
+  template:
+    src: dnsmasq.conf.j2
+    dest: /etc/dnsmasq.conf
+    owner: root
+    group: root
+    mode: 0644
+    backup: yes
+
+- name: fix the /etc/resolv.conf
+  lineinfile:
+    dest: /etc/default/dnsmasq
+    state: present
+    backup: yes
+    insertafter: EOF
+    line: 'DNSMASQ_EXCEPT=lo'
+
+- name: create a directory for tftp
+  file:
+    path: /tftpboot/pxelinux.cfg
+    state: directory
+    mode: 0755
+
+- name: restart dnsmasq service
+  systemd:
+    name: "{{ item }}"
+    state: restarted
+  with_items:
+    - dnsmasq.service
+    - systemd-resolved.service
+
+- name: restart networking
+  command: /usr/sbin/netplan apply
+
+- name: populate the tftp root
+  shell: creates="/tftpboot/{{ item }}" /bin/cp -p "{{ item }}" "/tftpboot/`basename {{ item }}`"
+  with_items:
+  - /usr/lib/PXELINUX/pxelinux.0
+  - /usr/lib/syslinux/modules/bios/menu.c32
+  - /usr/lib/syslinux/modules/bios/ldlinux.c32
+  - /usr/lib/syslinux/modules/bios/libmenu.c32
+  - /usr/lib/syslinux/modules/bios/libutil.c32
+
+- name: create the pxelinux configuration
+  copy:
+    src: default
+    dest: /tftpboot/pxelinux.cfg/default
+    owner: root
+    group: root
+    mode: 0644
+    backup: no

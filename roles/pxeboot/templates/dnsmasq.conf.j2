@@ -1,0 +1,10 @@
+# See an article titled "PXELinux using Proxy DHCP" 
+# OCTOBER 30, 2017 by THE URBAN PENGUIN
+# https://www.theurbanpenguin.com/pxelinux-using-proxy-dhcp/
+port=0
+log-dhcp
+dhcp-range={{ dhcp_range }},proxy
+dhcp-boot=pxelinux.0
+pxe-service=x86PC,'Network Boot',pxelinux
+enable-tftp
+tftp-root=/tftpboot
