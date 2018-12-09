@@ -1,0 +1,25 @@
+- name: upload necessary files
+  copy:
+    src: "{{ item }}"
+    dest: "/tftpboot/{{ item }}"
+    owner: root
+    group: root
+    mode: 0644
+  with_items:
+    - initrd.img-4.15.0-42-generic
+    - vmlinuz-4.15.0-42-generic
+
+- name: populate the tftp root
+  shell: creates="/tftpboot/{{ item }}" /bin/cp -p "{{ item }}" "/tftpboot/`basename {{ item }}`"
+  with_items:
+    - /usr/lib/syslinux/modules/bios/vesamenu.c32
+    - /usr/lib/syslinux/modules/bios/libcom32.c32
+
+- name: replace default menu
+  copy:
+    src: default
+    dest: /tftpboot/pxelinux.cfg/default
+    owner: root
+    group: root
+    mode: 0644
+    backup: yes

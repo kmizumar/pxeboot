@@ -2,3 +2,4 @@
   become: yes
   roles:
     - pxeboot
+    - pxeboot-ubuntu18.04

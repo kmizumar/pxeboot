@@ -1,0 +1,11 @@
+default vesamenu.c32
+prompt 0
+menu title PFN CHIP TEAM PXEBOOT MENU
+  label localboot
+    menu label Boot Local Disk
+    localboot 0
+
+  label network boot
+    menu label Ubuntu 18.04.1 LTS, kernel 4.15.0-42-generic
+    kernel vmlinuz-4.15.0-42-generic
+    append initrd=initrd.gpfn2 nbdroot=172.31.227.1:10809/qcow2 root=/dev/nbd0p2
